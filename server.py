@@ -1,4 +1,3 @@
-import asyncio
 import uuid
 
 from fastapi import FastAPI, Request
@@ -9,8 +8,10 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Dict
 
+
 class Game(BaseModel):
     name: str
+
 
 games: Dict[uuid.UUID, Game] = dict()
 
@@ -19,6 +20,7 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
+
 
 @app.get("/status")
 async def get_status():
@@ -32,7 +34,6 @@ async def index(request: Request):
 
 @app.post("/")
 async def create_game(request: Request, response_class=RedirectResponse):
-    print("creating game")
     game_id = uuid.uuid4()
     games[game_id] = Game(name=f'Game ({game_id})')
     return RedirectResponse(f'/game/{game_id}', status_code=303)
@@ -41,4 +42,7 @@ async def create_game(request: Request, response_class=RedirectResponse):
 @app.get("/game/{game_id}", response_class=HTMLResponse)
 async def get_game(request: Request, game_id: str):
     game = games[uuid.UUID(game_id)]
-    return templates.TemplateResponse("game.html", {'request': request})
+    return templates.TemplateResponse(
+        "game.html",
+        {'request': request, 'game_name': game.name}
+        )
