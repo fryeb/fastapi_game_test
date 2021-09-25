@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
+
 @app.get("/status")
-def get_status():
+async def get_status():
     return ({'status': 'running'})
