@@ -3,3 +3,5 @@ uvicorn
 gunicorn
 flake8
 mypy
+jinja2
+aiofiles
