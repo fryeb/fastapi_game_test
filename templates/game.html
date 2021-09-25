@@ -4,10 +4,15 @@ Test Game | Home
 {% endblock %}
 
 {% block body %}
-<form action="">
-	<label for="playername">
+	<label for="player_name">
 		Your Name:
-		<input type="text" id="playername">
+		<input type="text" id="player_name"/>
 	</label>
-	<button> Submit </button>
+	<button onclick="joinGame()"> Submit </button>
+	<ul id='messages'>
+	</ul>
+</form>
+
+<script src="{{ url_for('static', path='/js/main.js') }}"></script>
+
 {% endblock %}

@@ -1,19 +1,12 @@
 import uuid
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
-from pydantic import BaseModel
-from typing import Dict
+from typing import Dict, List
 
-
-class Game(BaseModel):
-    name: str
-
-
-games: Dict[uuid.UUID, Game] = dict()
 
 app = FastAPI()
 
@@ -35,14 +28,43 @@ async def index(request: Request):
 @app.post("/")
 async def create_game(request: Request, response_class=RedirectResponse):
     game_id = uuid.uuid4()
-    games[game_id] = Game(name=f'Game ({game_id})')
     return RedirectResponse(f'/game/{game_id}', status_code=303)
 
 
 @app.get("/game/{game_id}", response_class=HTMLResponse)
 async def get_game(request: Request, game_id: str):
-    game = games[uuid.UUID(game_id)]
     return templates.TemplateResponse(
         "game.html",
-        {'request': request, 'game_name': game.name}
+        {'request': request, 'game_id': game_id}
         )
+
+
+class Game:
+    def __init__(self):
+        self.sockets: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.sockets.append(websocket)
+
+    async def broadcast(self, data: str):
+        # TODO: We should probably await them all at once
+        for socket in self.sockets:
+            await socket.send_text(data)
+
+
+games: Dict[uuid.UUID, Game] = dict()
+
+
+@app.websocket("/game/{game_id}/{player_name}")
+async def game_socket(websocket: WebSocket, game_id: str, player_name: str):
+    game_uuid = uuid.UUID(game_id)
+    if game_uuid not in games:
+        games[game_uuid] = Game()
+
+    game = games[game_uuid]
+    await game.connect(websocket)
+    await game.broadcast(f"new player: {player_name}")
+    while True:
+        data = await websocket.receive_text()
+        await game.broadcast(f"{player_name}: {data}")
