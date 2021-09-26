@@ -4,13 +4,15 @@ Test Game | Home
 {% endblock %}
 
 {% block body %}
+<section>
 	<label for="player_name">
 		Your Name:
 		<input type="text" id="player_name"/>
 	</label>
 	<button onclick="joinGame()"> Submit </button>
-	<ul id='messages'>
-	</ul>
+</section>
+	<canvas id='c'>
+	</canvas>
 </form>
 
 <script src="{{ url_for('static', path='/js/main.js') }}"></script>

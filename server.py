@@ -42,19 +42,19 @@ async def get_game(request: Request, game_id: str):
 class Game:
     def __init__(self):
         self.sockets: List[WebSocket] = []
-        self.messages: List[str] = []
+        self.messages: List[Dict] = []
 
     async def connect(self, socket: WebSocket):
         await socket.accept()
         self.sockets.append(socket)
         for message in self.messages:
-            await socket.send_text(message)
+            await socket.send_json(message)
 
-    async def broadcast(self, message: str):
+    async def broadcast(self, message: Dict):
         self.messages.append(message)
         # TODO: We should probably await them all at once
         for socket in self.sockets:
-            await socket.send_text(message)
+            await socket.send_json(message)
 
 
 games: Dict[uuid.UUID, Game] = dict()
@@ -68,7 +68,7 @@ async def game_socket(websocket: WebSocket, game_id: str, player_name: str):
 
     game = games[game_uuid]
     await game.connect(websocket)
-    await game.broadcast(f"new player: {player_name}")
+    await game.broadcast({'player': player_name, 'action': 'Create'})
     while True:
-        message = await websocket.receive_text()
-        await game.broadcast(f"{player_name}: {message}")
+        message = await websocket.receive_json()
+        await game.broadcast(message)

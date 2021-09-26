@@ -8,10 +8,19 @@ body {
         padding:0 10px;
 }
 
-table {
-        text-align: left;
+canvas {
+	width: 100%;
+	background-color: #000000ff;
 }
 
-td {
-        text-align: right;
-}
+/*canvas {
+	display:block;
+	padding-left: 0;
+	padding-right: 0;
+	border: 2vw solid #fff;
+	width: 85vw;
+	max-width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: #FFFFFF00;
+}*/
