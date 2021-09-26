@@ -11,7 +11,6 @@ function processMessage(event) {
 
 function joinGame() {
 	player_name = document.querySelector('#player_name').value;
-	console.log(player_name);
 	const host = window.location.host;
 	const path = window.location.pathname;
 
